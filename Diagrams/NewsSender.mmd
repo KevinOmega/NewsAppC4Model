@@ -1,0 +1,20 @@
+%%{init: {"theme": "neutral"}}%%
+classDiagram
+    class NewsSender {
+        +requestNewsHistory(userId: string): List&lt;NewsData&gt;
+        +sendNewsHistory(userId: string): void
+    }
+
+    class NewsData {
+        +newsId: string
+        +title: string
+        +content: string
+        +topics: List&lt;string&gt;
+    }
+
+    class NewsRepository {
+        +getNewsByUserId(userId: string): List&lt;NewsData&gt;
+    }
+
+    NewsSender --> NewsRepository : "Requests news history"
+    NewsSender --> NewsData : "Sends formatted data"

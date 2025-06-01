@@ -1,0 +1,38 @@
+%%{init: {"theme": "neutral"}}%%
+classDiagram
+    class ClientRequestHandler {
+        +handleRequest(request: HttpRequest): HttpResponse
+        +validateClientData(data: ClientData): boolean
+        +sendToTopicSubscriber(data: ClientData): void
+    }
+
+    class HttpRequest {
+        +headers: Map
+        +body: string
+        +method: string
+        +url: string
+    }
+
+    class HttpResponse {
+        +statusCode: int
+        +body: string
+    }
+
+    class ClientData {
+        +clientId: string
+        +email: string
+        +topic: string
+    }
+
+    class TopicSubscriber {
+        +subscribeToBroker(clientData: ClientData): void
+        +formatMessage(clientData: ClientData): string
+        +sendMessage(message: string): void
+    }
+
+    ClientRequestHandler --> HttpRequest
+    ClientRequestHandler --> HttpResponse
+    ClientRequestHandler --> ClientData
+    ClientRequestHandler --> TopicSubscriber : "Sends data to"
+
+    note for TopicSubscriber "External component outside ClientRequestHandler"

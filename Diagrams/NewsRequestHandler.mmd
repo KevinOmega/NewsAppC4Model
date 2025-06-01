@@ -1,0 +1,40 @@
+%%{init: {"theme": "neutral"}}%%
+classDiagram
+    class NewsRequestHandler {
+        -rabbitMQ: RabbitMQ
+        +sendToNewsRepository(newsData: NewsData): void
+        +ackowledgeMessage(): RabbitMQMessage
+    }
+
+
+    class NewsData {
+        +newsId: string
+        +userId: string
+        +title: string
+        +content: string
+        +topics: List&lt;string&gt;
+    }
+
+    class NewsRepository {
+        +save(newsData: NewsData): void
+        +confirmSave(): boolean
+    }
+
+    class RabbitMQ {
+        -receiveQueue: string
+        -ackQueue: string
+        +consume(): NewsData
+        +publishAcknowledgment(message: RabbitMQMessage): void
+    }
+
+    class RabbitMQMessage{
+        +messageId: string
+        +content: string
+        +messageType: string
+    }
+
+    NewsRequestHandler --> NewsData : "uses"
+    NewsRequestHandler --> NewsRepository : "Sends formatted data"
+    NewsRequestHandler --> RabbitMQ : "Sends acknowledgment"
+    RabbitMQ --> RabbitMQMessage : "uses"
+    NewsRequestHandler --> RabbitMQMessage : "formatsMessage"

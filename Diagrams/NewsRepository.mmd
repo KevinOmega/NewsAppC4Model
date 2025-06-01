@@ -1,0 +1,28 @@
+%%{init: {"theme": "neutral"}}%%
+classDiagram
+    class NewsRepository {
+        +save(newsData: NewsData): boolean
+        +confirmSave(): boolean
+        +getNewsHistory(userId: string): List&lt;NewsData&gt;
+    }
+
+    class NewsData {
+        +newsId: string
+        +userId: string
+        +title: string
+        +content: string
+        +topics: List&lt;string&gt;
+    }
+
+    class Database {
+        +insert(data: NewsData): boolean
+        +getNewsByUserId(userId: string): List&lt;NewsData&gt;
+    }
+
+    class NewsSender {
+        +requestNewsHistory(userId: string): List&lt;NewsData&gt;
+    }
+
+    NewsRepository --> NewsData : "Manages"
+    NewsRepository --> Database : "Interacts with"
+    NewsSender --> NewsRepository : "Requests news history"

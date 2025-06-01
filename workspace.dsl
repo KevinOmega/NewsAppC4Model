@@ -1,8 +1,9 @@
 workspace "NewsSystem" "Description" {
 
-   model {
+model {
         u = person "Usuario"
-        ss = softwareSystem "Sistema de Software" {
+        ss = softwareSystem "Sistema de Subscripción de Noticias" {
+            description "Sistema que permite a los usuarios suscribirse a temas de noticias y recibir actualizaciones diarias por correo electrónico."
         
             api_g = container "Aplicación Web" {
                 technology "Angula js"
@@ -87,8 +88,6 @@ workspace "NewsSystem" "Description" {
                 tags "database"
             }
     
-            historic_service -> api_g "Consulta historial de noticias vía [GET]"
-            historic_service -> news_historic_db "Almacena datos en"
            
             topicsubscriber -> message_bus "Envia información del cliente al bus de mensajes"
 
@@ -96,43 +95,58 @@ workspace "NewsSystem" "Description" {
             news_repository -> news_historic_db "Almacena datos en"
 
            
-            message_bus -> email_service "Envía evento de actualización de noticias"
-            message_bus -> historic_service "Envía eventos de actualización de noticias"
-            message_bus -> news_service "Recibe eventos de actualización del cliente"
-            news_service -> topic_db "Almacena datos en"
+ 
         }
 
     api = softwareSystem "API de Noticias" {
         tags "external"
     }
 
-    u -> ss "Usa"
-    ss -> api "Obtiene noticias"
     u -> api_g "Se subscribe a noticias mediante [HTTPS POST]"
-    email_service -> u "Envía correos electrónicos usando [Protocolo de Correo]"
     api_g -> u "Solicita historial de noticias a tráves [HTTPS GET]"
-    api -> news_service "Obtiene noticias para el cliente usando [síncrono, JSON/HTTPS]"
+
+    email_service -> u "Envía correos electrónicos usando [Protocolo de Correo]"
+    news_service -> api "Solicita noticias a travez de [HTTP GET]"
+
 }
 
 
     views {
+        properties {
+            "plantuml.url" "C:\Users\TUF\OneDrive\Documentos\Projects\C4\clientService"
+            "mermaid.url" "http://localhost:3000"
+        }
+
         systemContext ss "Diagram1" {
             include *
-            autolayout lr
+            autolayout rl
+            title "Diagrama de contexto para Sistema de Subscripción de Noticias"
         }
         
-        container ss "Diagram2"{
+        container ss "ContainerDiagram" {
             include *
-            autolayout lr
+            // autolayout rl
+            title "Diagrama de contenedores para Sistema de Software"
         }
 
         component client_service "ClientService" {
             include *
             autolayout lr
+            title "Diagrama de componentes para Servicio de Cliente"
         }
         component historic_service "HistoricService" {
             include *
             autolayout lr
+            title "Diagrama de componentes para Servicio Histórico"
+        }
+
+        image client_request_handler "ClientRequestHandler"{
+            image "./diagrams/ClientRequestHandler.png"
+            title  "Diagrama de Clases para ClientRequestHandler"
+        }
+        image topicsubscriber "TopicSubscriber"{
+            image "./diagrams/TopicSubscriber.png"
+            title  "Diagrama de Clases para TopicSubscriber"
         }
         
         styles {
@@ -145,6 +159,12 @@ workspace "NewsSystem" "Description" {
                 background #08427b
                 shape person
             }
+
+            element "Image"{
+                fontSize 20
+                width 1000
+                height 1000
+            }
             element "external"{
                 background #999999
             }
@@ -154,6 +174,7 @@ workspace "NewsSystem" "Description" {
             element "webapp"{
                 shape WebBrowser
             }
+            
         }
         
         

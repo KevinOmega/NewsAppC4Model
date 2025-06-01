@@ -1,0 +1,29 @@
+%%{init: {"theme": "neutral"}}%%
+classDiagram
+    class TopicSubscriber {
+        +subscribeToBroker(clientData: ClientData): void
+        +formatMessage(clientData: ClientData): string
+        +sendMessage(message: string): void
+    }
+
+    class ClientData {
+        +clientId: string
+        +clientName: string
+        +email: string
+        +topic: string
+    }
+
+    class RabbitMQ {
+        +publish(message: string): void
+        +queueName: string
+        +exchangeName: string
+    }
+
+    class ClientRequestHandler {
+        +handleRequest(request: HttpRequest): HttpResponse
+        +validateClientData(data: ClientData): boolean
+        +sendToTopicSubscriber(data: ClientData): void
+    }
+    ClientRequestHandler --> TopicSubscriber : "provides data to"
+    TopicSubscriber --> RabbitMQ : "sends messages to"
+    TopicSubscriber --> ClientData : "uses"

@@ -1,0 +1,14 @@
+@startuml CarDiagram
+
+class Car{
+    + String make
+    - int id
+    + void start()
+}
+class Driver
+
+Car --> Driver : drives
+
+
+
+@enduml
