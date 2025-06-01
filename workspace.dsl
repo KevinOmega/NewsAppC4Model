@@ -4,15 +4,27 @@ workspace "NewsSystem" "Description" {
         u = person "Usuario"
         ss = softwareSystem "Sistema de Software" {
         
-            api_g = container "Pasarela de API" {
-                technology "Kubernetes"
+            api_g = container "Aplicación Web" {
+                technology "Angula js"
                 description "Gestiona las solicitudes del cliente y actúa como punto de entrada"
+                tags "webapp"
             }
     
             #Kevin
             client_service = container "Servicio de Cliente" {
                 technology "C#/.NET"
                 description "Gestiona la información del cliente"
+
+                # Componentes
+                service1 = component "Servicio 1" {
+                    description "Recibe información del cliente, el correo electrónico y la temática a la que se desea suscribir."
+                    technology "C#/.NET"
+                }
+
+                topicsubscriber = component "TopicSubscriber" {
+                    description "Envía la información al broker de mensajería."
+                    technology "C#/.NET"
+                }
             }
     
             #Kevin
@@ -84,6 +96,11 @@ workspace "NewsSystem" "Description" {
             include *
             autolayout lr
         }
+
+        component client_service "ClientService" {
+            include *
+            autolayout lr
+        }
         
         styles {
             element "Element"{
@@ -100,6 +117,9 @@ workspace "NewsSystem" "Description" {
             }
             element "database"{
                 shape cylinder
+            }
+            element "webapp"{
+                shape WebBrowser
             }
         }
         
