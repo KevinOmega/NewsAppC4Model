@@ -1,0 +1,49 @@
+%%{init: {"theme": "neutral"}}%%
+classDiagram
+    class NewsController {
+        userInfoController: UserInfoController
+        -externalAPI: ExternalAPIConnection
+        +fetchNews(topic : string): List&lt;News&gt;
+        +getUsersByTopic(topic: string): List&lt;User&gt;
+        sendUserListAndNews(): Message
+    }
+    
+
+    class Message{
+        +userList: List&lt;User&gt;
+        +newsList: List&lt;News&gt;
+    }
+
+    class User{
+        +userId: string
+        +email: string
+    }
+
+    class UserInfoController {
+        getUserByTopic(topic: string): User[]
+        sendUsersList(): User[]
+    }
+
+    class ExternalAPIConnection {
+        +url: string
+        +apiKey: string
+        +fetchNewsByTopic(topic: string): List&lt;News&gt;
+    }
+
+    
+    class News {
+        +newsId: string
+        +title: string
+        +content: string
+        +topics: List&lt;string&gt;
+        +timestamp: Date
+    }
+    UserInfoController --> User : "uses"
+    NewsController --> News : "uses"
+    NewsController --> ExternalAPIConnection : "Queries"
+    NewsController --> UserInfoController : "gets users by topic"
+    NewsController --> User : "uses"
+    NewsController --> Message : "creates"
+
+
+

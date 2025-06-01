@@ -1,113 +1,143 @@
 workspace "NewsSystem" "Description" {
 
 model {
-        u = person "Usuario"
-        ss = softwareSystem "Sistema de Subscripción de Noticias" {
-            description "Sistema que permite a los usuarios suscribirse a temas de noticias y recibir actualizaciones diarias por correo electrónico."
+        u = person "User"
+        api = softwareSystem "News API" {
+        tags "external"
+    }
+        external_mail = softwareSystem "External Mail Service" {
+            description "External email service used to send notifications to customers."
+            tags "external"
+        }
+        ss = softwareSystem "News Subscription System" {
+            description "System that allows users to subscribe to news topics and receive daily updates via email."
         
-            api_g = container "Aplicación Web" {
-                technology "Angula js"
-                description "Gestiona las solicitudes del cliente y actúa como punto de entrada"
+            api_g = container "Web Application" {
+                technology "AngularJS"
+                description "Handles client requests and acts as the entry point."
                 tags "webapp"
             }
 
-            message_bus = container "Bus de Mensajes" {
+            message_bus = container "Message Bus" {
                 technology "RabbitMQ"
-                description "Transporte para eventos de negocio"
+                description "Transport for business events."
+            }
+            news_historic_db = container "News Historic Database" {
+                technology "Postgres"
+                description "Stores information about daily news."
+                tags "database"
             }
     
-            #Kevin
-            client_service = container "Servicio de Cliente" {
+            topic_db = container "Topic Database" {
+                technology "Postgres"
+                description "Stores data with topics selected by the client."
+                tags "database"
+            }
+
+            client_service = container "Client Service" {
                 technology "C#/.NET"
-                description "Gestiona la información del cliente"
+                description "Manages client information."
 
-                # Componentes
-                 client_request_handler = component "ClientRequestHandler" {
-                    description "Recibe información del cliente, el correo electrónico y la temática a la que se desea suscribir mediante solicitudes POST."
+                client_request_handler = component "Client Request Handler" {
+                    description "Receives client information, email, and the topic to subscribe via POST requests."
                     technology "C#/.NET"
                 }
 
-                topicsubscriber = component "TopicSubscriber" {
-                    description "Envía la información al broker de mensajería."
+                topic_subscriber = component "Topic Subscriber" {
+                    description "Sends client information to the message broker."
                     technology "C#/.NET"
                 }
-                api_g -> client_request_handler "Envía información del cliente usando [HTTPS POST]"
-                client_request_handler -> topicsubscriber "Envía información del cliente al broker de mensajería"
+                api_g -> client_request_handler "Sends client information using [HTTPS POST]"
+                client_request_handler -> topic_subscriber "Sends client information to the message broker."
             }
     
-            #Kevin
-            historic_service = container "Servicio Histórico" {
+            historic_service = container "Historic Service" {
                 technology "Python"
-                description "Proporciona noticias históricas para los clientes"
-                # Componentes
-                news_request_handler = component "NewsRequestHandler" {
-                    description "Recibe la informacion de las noticias diarias enviadas al usuario y las envía al repositorio de noticias."
+                description "Provides historical news for clients."
+
+                news_request_handler = component "News Request Handler" {
+                    description "Receives daily news information sent to the user and sends it to the news repository."
                     technology "Python"
                 }
 
-                news_repository = component "NewsRepository" {
-                    description "Almacena noticias por usuario y recupera el historial de noticias de los usuarios."
+                news_repository = component "News Repository" {
+                    description "Stores news by user and retrieves the user's news history."
                     technology "Python"
                 }
-                news_sender = component "NewsSender" {
-                    description "Solicita el historial de noticias de un usuario y lo envía."
+                news_sender = component "News Sender" {
+                    description "Requests the user's news history and sends it."
                     technology "Python"
                 }
-                message_bus -> news_request_handler "Envía noticias diarias"
-                news_request_handler -> message_bus "Confirma la recepción de noticias"
-                news_request_handler -> news_repository "Envia datos al repositorio de noticias "
-                news_sender -> news_repository "Solicita historial de noticias"
-                news_sender -> api_g -> "Envia historial de noticias a traves de [HTTPS GET]"
+                message_bus -> news_request_handler "Sends daily news."
+                news_request_handler -> message_bus "Confirms the receipt of news."
+                news_request_handler -> news_repository "Sends data to the news repository."
+                news_sender -> news_repository "Requests news history."
+                news_sender -> api_g "Sends news history via [HTTPS GET]"
+            }
+    
+            email_service = container "Email Service" {
+                technology "Node.js, Express"
+                description "Sends email notifications to clients."
 
+                email_sender = component "Email Sender" {
+                    description "Sends emails to clients with selected news."
+                    technology "Node.js, Express, Nodemailer"
+                }
+                news_receiver = component "News Receiver" {
+                    description "Receives news from RabbitMQ and processes it to send via email."
+                    technology "Node.js, Express, RabbitMQ"
+                }
+                message_bus -> news_receiver "Sends news to be processed."
+                news_receiver -> email_sender "Sends processed news to be sent via email."
+                email_sender -> external_mail "Sends news information."
             }
+    
+            news_service = container "SNews Service" {
+                technology "Java, Spring Boot"
+                description "Processes user preferences and stores them"
+                preference_handler = component "PreferenceHandler" {
+                    description "Processes user preferences from the messaging broker queue and saves the selected topic record."
+                    technology "Java, Spring Boot"
+                }
+
+                news_fetcher = component "NewsFetcher" {
+                    description "Queries the external news service daily based on user preferences."
+                    technology "Java, Spring Boot"
+                }
+
+                news_publisher = component "NewsPublisher" {
+                    description "Sends the obtained news to another queue in the messaging broker."
+                    technology "Java, Spring Boot"
+                }
+                preference_handler -> news_fetcher "Queries users with specific preferences"
+                message_bus -> preference_handler "Receives user preferences from the queue"
+                preference_handler -> topic_db "Stores the selected topic"
+                news_fetcher -> api "Fetches news related to the selected topic"
+                news_fetcher -> news_publisher "Sends fetched news"
+                news_publisher -> message_bus "Publishes news to the messaging broker queue"
+                news_fetcher -> preference_handler "Queries users with specific preferences"
+            }
+    
             
     
-            #Juan
-            email_service = container "Servicio de Correo" {
-                technology "Java, Spring Boot"
-                description "Envía notificaciones por correo electrónico a los clientes"
-            }
-    
-            #Juan
-            news_service = container "Servicio de Noticias" {
-                technology "Java, Spring Boot"
-                description "Crea temas para el cliente y obtiene noticias"
-            }
-    
             
-    
-            news_historic_db = container "BD Histórica de Noticias" {
-                technology "Postgres"
-                description "Almacena información sobre noticias diarias"
-                tags "database"
-            }
-    
-            topic_db = container "Base de Datos de Temas" {
-                technology "Postgres"
-                description "Almacena datos con los temas seleccionados por el cliente"
-                tags "database"
-            }
     
            
-            topicsubscriber -> message_bus "Envia información del cliente al bus de mensajes"
+            topic_subscriber -> message_bus "Sends client information to the message bus"
 
-            // Histórico de noticias
-            news_repository -> news_historic_db "Almacena datos en"
+            // News history
+            news_repository -> news_historic_db "Stores data in"
 
            
  
         }
 
-    api = softwareSystem "API de Noticias" {
-        tags "external"
-    }
+    
 
-    u -> api_g "Se subscribe a noticias mediante [HTTPS POST]"
-    api_g -> u "Solicita historial de noticias a tráves [HTTPS GET]"
-
-    email_service -> u "Envía correos electrónicos usando [Protocolo de Correo]"
-    news_service -> api "Solicita noticias a travez de [HTTP GET]"
-
+    u -> api_g "Subscribes to news via [HTTPS POST]"
+    api_g -> u "Requests news history via [HTTPS GET]"
+    news_service -> api "Requests news via [HTTP GET]"
+    external_mail -> u "Sends email notifications via [SMTP]"
 }
 
 
@@ -125,7 +155,7 @@ model {
         
         container ss "ContainerDiagram" {
             include *
-            // autolayout rl
+            autolayout rl
             title "Diagrama de contenedores para Sistema de Software"
         }
 
@@ -139,12 +169,22 @@ model {
             autolayout lr
             title "Diagrama de componentes para Servicio Histórico"
         }
+        component news_service "NewsService" {
+            include *
+            autolayout lr
+            title "Diagrama de componentes para Servicio de Noticias"
+        }
+        component email_service "EmailService" {
+            include *
+            autolayout lr
+            title "Diagrama de componentes para Servicio de Correo"
+        }
 
         image client_request_handler "ClientRequestHandler"{
-            image "./diagrams/ClientRequestHandler.png"
+            image "./diagrams/ClientService/ClientRequestHandler.png"
             title  "Diagrama de Clases para ClientRequestHandler"
         }
-        image topicsubscriber "TopicSubscriber"{
+        image topic_subscriber "TopicSubscriber"{
             image "./diagrams/TopicSubscriber.png"
             title  "Diagrama de Clases para TopicSubscriber"
         }

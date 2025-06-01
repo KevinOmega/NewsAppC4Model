@@ -1,0 +1,52 @@
+%%{init: {"theme": "neutral"}}%%
+classDiagram
+    class PreferenceHandler {
+        -rabbitMQ: RabbitMQ
+        +getMessage(message : RabbitMQMessage ): void
+        +validateEmail(email : string): boolean
+        +createOrUpdatePreferences(clientId: string,email: string, topic : string): void
+    }
+
+    class UserInfoController {
+        getUserByTopic(topic: string): User[]
+        sendUsersList(): User[]
+    }
+
+    class User {
+        +userId: string
+        +email: string
+    }
+
+    class TopicDB {
+        +create(clientId: string,email :string, topic : string ): boolean
+        +update(clientId: string, topic : string): boolean
+    }
+
+    class RabbitMQ {
+        +consumeQueue: string
+        +ackQueue: string
+
+        +consume(): RabbitMQMessage
+        +publishAcknowledgment(message : ACKMessage): void
+    }
+    class RabbitMQMessage{
+        +userId: string
+        +emial: string
+        +messageId: string
+        +topic: string
+    }
+
+    class ACKMessage {
+        +messageId: string
+        +content: string
+        +messageType: string
+    }
+
+    
+    UserInfoController --> User : "Uses"
+    RabbitMQ --> RabbitMQMessage : "uses"
+    PreferenceHandler --> RabbitMQMessage : "uses"
+    RabbitMQ --> ACKMessage : "uses"
+    PreferenceHandler --> TopicDB : "Interacts with"
+    PreferenceHandler --> RabbitMQ : "Receives preferences from"
+    UserInfoController --> TopicDB : "Interacts with"

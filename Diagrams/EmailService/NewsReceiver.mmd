@@ -1,0 +1,39 @@
+%%{init: {"theme": "neutral"}}%%
+classDiagram
+    class NewsReceiver {
+        +receiveMessage(): Message
+        +processMessage(message: Message): void
+        +sendToEmailSender(message: Message): void
+    }
+
+    class Message {
+        +userList: List&lt;User&gt;
+        +newsList: List&lt;News&gt;
+    }
+
+    class User {
+        +userId: string
+        +email: string
+    }
+
+    class News {
+        +newsId: string
+        +title: string
+        +content: string
+        +topics: List&lt;string&gt;
+        +timestamp: Date
+    }
+
+    class EmailSender {
+        +sendEmail(message: Message): void
+    }
+
+    class RabbitMQ {
+        +consume(queueName: string): Message
+    }
+
+    NewsReceiver --> Message : "Receives"
+    NewsReceiver --> RabbitMQ : "Consumes messages from"
+    NewsReceiver --> EmailSender : "Sends processed messages to"
+    Message --> User : "contains"
+    Message --> News : "contains"

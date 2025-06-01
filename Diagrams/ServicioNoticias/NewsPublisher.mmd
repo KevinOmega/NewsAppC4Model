@@ -1,0 +1,43 @@
+%%{init: {"theme": "neutral"}}%%
+classDiagram
+    class NewsPublisher {
+        -rabbitMQ: RabbitMQConfig
+        +publishNews(message: Message): void
+        +formatMessage(users: List&lt;User&gt;, news: List&lt;News&gt;): Message
+        +sendToMessageBus(message: Message): void
+    }
+
+    class Message {
+        +userList: List&lt;User&gt;
+        +newsList: List&lt;News&gt;
+    }
+
+    class User {
+        +userId: string
+        +email: string
+    }
+
+    class News {
+        +newsId: string
+        +title: string
+        +content: string
+        +topics: List&lt;string&gt;
+        +timestamp: Date
+    }
+
+    class NewsController {
+        +fetchNews(topic: string): List&lt;News&gt;
+        +getUsersByTopic(topic: string): List&lt;User&gt;
+        +sendUserListAndNews(): Message
+    }
+
+    class RabbitMQConfig {
+        +publish(message: Message): void
+        +queueName: string
+    }
+
+    NewsPublisher --> Message : "creates and sends"
+    NewsPublisher --> NewsController : "gets data from"
+    NewsPublisher --> RabbitMQConfig : "sends messages to"
+    Message --> User : "contains"
+    Message --> News : "contains"
