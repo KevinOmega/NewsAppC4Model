@@ -1,0 +1,34 @@
+%%{init: {"theme": "neutral"}}%%
+classDiagram
+    class EmailSender {
+        +sendEmail(message: Message): void
+        +formatEmailContent(newsList: List&lt;News&gt;): string
+        +sendToExternalService(email: string, content: string): void
+    }
+
+    class Message {
+        +userList: List&lt;User&gt;
+        +newsList: List&lt;News&gt;
+    }
+
+    class User {
+        +userId: string
+        +email: string
+    }
+
+    class News {
+        +newsId: string
+        +title: string
+        +content: string
+        +topics: List&lt;string&gt;
+        +timestamp: Date
+    }
+
+    class ExternalMailService {
+        +send(email: string, content: string): boolean
+    }
+
+    EmailSender --> Message : "Processes"
+    EmailSender --> ExternalMailService : "Sends emails to"
+    Message --> User : "contains"
+    Message --> News : "contains"

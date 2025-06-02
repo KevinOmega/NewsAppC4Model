@@ -92,7 +92,7 @@ model {
                 email_sender -> external_mail "Sends news information."
             }
     
-            news_service = container "SNews Service" {
+            news_service = container "News Service" {
                 technology "Java, Spring Boot"
                 description "Processes user preferences and stores them"
                 preference_handler = component "PreferenceHandler" {
@@ -149,44 +149,44 @@ model {
 
         systemContext ss "Diagram1" {
             include *
-            autolayout rl
-            title "Diagrama de contexto para Sistema de Subscripción de Noticias"
+            // autolayout rl
+            title "Context Diagram for News Subscription System"
         }
         
         container ss "ContainerDiagram" {
             include *
-            autolayout rl
-            title "Diagrama de contenedores para Sistema de Software"
+            // autolayout rl
+            title "Container Diagram for Software System"
         }
 
         component client_service "ClientService" {
             include *
             autolayout lr
-            title "Diagrama de componentes para Servicio de Cliente"
+            title "Component Diagram for Client Service"
         }
         component historic_service "HistoricService" {
             include *
             autolayout lr
-            title "Diagrama de componentes para Servicio Histórico"
+            title "Component Diagram for Historic Service"
         }
         component news_service "NewsService" {
             include *
-            autolayout lr
-            title "Diagrama de componentes para Servicio de Noticias"
+            // autolayout lr
+            title "Component Diagram for News Service"
         }
         component email_service "EmailService" {
             include *
             autolayout lr
-            title "Diagrama de componentes para Servicio de Correo"
+            title "Component Diagram for Email Service"
         }
 
         image client_request_handler "ClientRequestHandler"{
             image "./diagrams/ClientService/ClientRequestHandler.png"
-            title  "Diagrama de Clases para ClientRequestHandler"
+            title  "Class Diagram for ClientRequestHandler"
         }
         image topic_subscriber "TopicSubscriber"{
             image "./diagrams/TopicSubscriber.png"
-            title  "Diagrama de Clases para TopicSubscriber"
+            title  "Class Diagram for TopicSubscriber"
         }
         
         styles {

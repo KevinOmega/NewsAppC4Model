@@ -1,6 +1,7 @@
 %%{init: {"theme": "neutral"}}%%
 classDiagram
     class NewsReceiver {
+        -rabbitMQConfig: RabbitMQConfig
         +receiveMessage(): Message
         +processMessage(message: Message): void
         +sendToEmailSender(message: Message): void
@@ -28,12 +29,13 @@ classDiagram
         +sendEmail(message: Message): void
     }
 
-    class RabbitMQ {
-        +consume(queueName: string): Message
+    class RabbitMQConfig {
+        +queueName: string
+        +consume(): Message
     }
 
     NewsReceiver --> Message : "Receives"
-    NewsReceiver --> RabbitMQ : "Consumes messages from"
+    NewsReceiver --> RabbitMQConfig : "Consumes messages from"
     NewsReceiver --> EmailSender : "Sends processed messages to"
     Message --> User : "contains"
     Message --> News : "contains"
