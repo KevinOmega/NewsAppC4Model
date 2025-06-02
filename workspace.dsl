@@ -118,10 +118,6 @@ model {
                 news_fetcher -> preference_handler "Queries users with specific preferences"
             }
     
-            
-    
-            
-    
            
             topic_subscriber -> message_bus "Sends client information to the message bus"
 
